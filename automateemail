@@ -1,0 +1,105 @@
+Sub EmailAll()
+    Dim oApp As Object
+    Dim oMail As Object
+    Dim SendToName As String
+    Dim theSubject As String
+    Dim theBody As String
+    '''Dim olNs As Namespace
+    Dim Fldr As MAPIFolder
+    Dim objReplyToThisMail As MailItem
+    Dim lngCount As Long
+    Dim objConversation As Conversation
+    Dim objTable As Table
+    Dim objVar As Variant
+        
+    lngCount = 1
+    
+    For Each c In Selection 'loop through (manually) selected records
+    '''For each row in selection, collect the key parts of
+    '''the email message from the Table
+     
+        SendToName = Range("A" & c.Row)
+        theSubject = Range("J" & c.Row)
+        CompanyName = Range("B" & c.Row)
+        Attention = Range("C" & c.Row)
+        Quote = Range("F" & c.Row)
+        TenderName = Range("G" & c.Row)
+        ECD = Range("I" & c.Row)
+        '''theBody = Range("K" & c.Row)
+            
+    '''Compose emails for each selected record
+      '''Set object variables.
+        Dim olNs As Namespace
+        Set oApp = CreateObject("Outlook.Application")
+        Set oMail = oApp.CreateItem(0)
+        Set olApp = Session.Application
+        Set olNs = olApp.GetNamespace("MAPI")
+        Set Fldr = olNs.GetDefaultFolder(olFolderInbox)
+        
+    '''Check for any previous emails
+        lngCount = 1
+        
+        For Each objMail In Fldr.Items
+             If TypeName(objMail) = "MailItem" Then
+             If InStr(objMail.Body, CompanyName) <> 0 Then 'CompanyName
+                Set objConversation = objMail.GetConversation
+                Set objTable = objConversation.GetTable
+                objVar = objTable.GetArray(objTable.GetRowCount)
+                Set objReplyToThisMail = olApp.Session.GetItemFromID(objVar(UBound(objVar), 0))
+                With objReplyToThisMail.ReplyAll
+           
+      '''Compose the customized message
+                    With oMail
+                        .To = SendToName
+                        .cc = "wujie@crf.com.sg;alicialim@crf.com.sg;kpkong@crf.com.sg;teasw@crf.com.sg"
+                        .Subject = theSubject
+                        .HTMLBody = "To: " & CompanyName & "<br>" & "Attn: " & Attention & "<br><br>" & "Dear Sir/Madam," & "<br><br>" & _
+                        "<b>PART A: BUILDING WORKS AT QUEENSWAY CONTRACT 1 (TOTAL: 844 DWELLING UNITS)</b>" & _
+                        "<br>" & "<b> PART B: CONTINGENCY WORKS</b>" & "<br><br>" & _
+                        "We would like to invite your company to quote the " & "<b><u>" & Quote & "</b></u>" & _
+                        "for the above-mentioned tender. Please find the attached Site Plan for your information and record." & "<br><br" & _
+                        "Please click the below link to download the fullset of tender documents & drawings (included " & TenderName & "<br>" & _
+                        "<HTML><BODY>" & "<A href = http://gofile.me/5eRwf/mcCKbsPOL>http://gofile.me/5eRwf/mcCKbsPOL</A>" & "<br><br>" & _
+                        "We wish to receive your quotation not later than " & "<b><u>" & ECD & "</b></u>" & ". Your earliest response will be highly appreciated" & "<br><br>" & _
+                        "If you have any queries, please feel free to contact the undersigned."
+            Else
+                    With oMail
+                        .To = SendToName
+                        .cc = "wujie@crf.com.sg;alicialim@crf.com.sg;kpkong@crf.com.sg;teasw@crf.com.sg"
+                        .Subject = theSubject
+                        .HTMLBody = "ABCD_To: " & CompanyName & "<br>" & "Attn: " & Attention & "<br><br>" & "Dear Sir/Madam," & "<br><br>" & _
+                        "<b>PART A: BUILDING WORKS AT QUEENSWAY CONTRACT 1 (TOTAL: 844 DWELLING UNITS)</b>" & _
+                        "<br>" & "<b> PART B: CONTINGENCY WORKS</b>" & "<br><br>" & _
+                        "We would like to invite your company to quote the " & "<b><u>" & Quote & "</b></u>" & _
+                        "for the above-mentioned tender. Please find the attached Site Plan for your information and record." & "<br><br" & _
+                        "Please click the below link to download the fullset of tender documents & drawings (included " & TenderName & "<br>" & _
+                        "<HTML><BODY>" & "<A href = http://gofile.me/5eRwf/mcCKbsPOL>http://gofile.me/5eRwf/mcCKbsPOL</A>" & "<br><br>" & _
+                        "We wish to receive your quotation not later than " & "<b><u>" & ECD & "</b></u>" & ". Your earliest response will be highly appreciated" & "<br><br>" & _
+                        "If you have any queries, please feel free to contact the undersigned."
+                        
+                .Display
+                End With
+                Exit For
+            End If
+        Next objMail
+        
+        Set olApp = Nothing
+        Set olNs = Nothing
+        Set Fldr = Nothing
+        Set objMail = Nothing
+        Set objReplyToThisMail = Nothing
+        lngCount = Empty
+        Set objConversation = Nothing
+        Set objTable = Nothing
+        If IsArray(objVar) Then Erase objVar
+          
+        ''' If you want to send emails automatically, use the Send option.
+        ''' If you want to generate draft emails and review before sending, use the Display option.
+        ''' Do not use both!
+        '''To activate your chosen option: Remove the single quote from the beginning of the code line, then
+        '''add the single quote back to the option you didn't choose
+        
+        '.Send
+        End With
+    Next c
+End Sub
